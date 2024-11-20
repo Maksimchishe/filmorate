@@ -56,7 +56,7 @@ public class UserController {
             throw ValidationException.loginValidationException();
         }
 
-        if (user.getName().isBlank() || user.getName().isEmpty()) {
+        if (user.getName().isBlank()) {
             user.setName(user.getEmail());
         }
 
@@ -86,7 +86,7 @@ public class UserController {
                 throw ValidationException.loginValidationException();
             }
 
-            if (user.getName().isBlank() || user.getName().isEmpty()) {
+            if (user.getName().isBlank()) {
                 user.setName(user.getEmail());
             }
 
