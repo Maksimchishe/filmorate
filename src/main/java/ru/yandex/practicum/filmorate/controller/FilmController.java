@@ -64,15 +64,14 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Film> updateFilmById(@PathVariable int id, @RequestBody Film film) {
-        if (films.containsKey(id)) {
-            film.setId(id);
-            films.put(id, film);
-            logUserController.info("Фильм с id {} успешно обновлен.", id);
-            return ResponseEntity.ok().body(films.get(id));
+    @PutMapping
+    public ResponseEntity<Film> updateFilmById(@RequestBody Film film) {
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(), film);
+            logUserController.info("Фильм с id {} успешно обновлен.", film.getId());
+            return ResponseEntity.ok().body(films.get(film.getId()));
         }
-        logUserController.warn("Фильм с id {} не найден.", id);
+        logUserController.warn("Фильм с id {} не найден.", film.getId());
         return ResponseEntity.notFound().build();
     }
 

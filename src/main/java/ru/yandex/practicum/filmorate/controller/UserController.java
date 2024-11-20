@@ -72,9 +72,9 @@ public class UserController {
         return user;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUserById(@PathVariable int id, @RequestBody User user) {
-        if (users.containsKey(id)) {
+    @PutMapping
+    public ResponseEntity<User> updateUserById(@RequestBody User user) {
+        if (users.containsKey(user.getId())) {
 
             if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
                 logUserController.error("Некорректный формат электронной почты.");
@@ -95,10 +95,9 @@ public class UserController {
                 throw ValidationException.birthdayValidationException();
             }
 
-            user.setId(id);
-            users.put(id, user);
+            users.put(user.getId(), user);
             logUserController.info("Пользователь {} успешно обновлен.", user.getName());
-            return ResponseEntity.ok().body(users.get(id));
+            return ResponseEntity.ok().body(users.get(user.getId()));
         }
         return ResponseEntity.notFound().build();
     }
