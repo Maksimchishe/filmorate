@@ -67,13 +67,14 @@ public class UserController {
 
         int id = nextId();
         user.setId(id);
-        users.put(user.getId(), user);
+        users.put(id, user);
         logUserController.info("Пользователь {} успешно добавлен.", user.getName());
-        return user;
+        return users.get(id);
     }
 
     @PutMapping
     public ResponseEntity<User> updateUserById(@RequestBody User user) {
+
         if (users.containsKey(user.getId())) {
 
             if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
