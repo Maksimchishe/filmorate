@@ -61,7 +61,7 @@ public class FilmController {
         film.setId(id);
         films.put(film.getId(), film);
         logUserController.info("Фильм с id {} успешно добавлен.", id);
-        return film;
+        return films.get(id);
     }
 
     @PutMapping
