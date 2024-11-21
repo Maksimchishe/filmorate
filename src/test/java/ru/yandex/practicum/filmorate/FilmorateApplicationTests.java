@@ -145,11 +145,10 @@ class FilmorateApplicationTests {
         film.setName(" ");
         film.setDescription("Description");
         film.setReleaseDate(LocalDate.of(2024, 1, 1));
-        film.setDuration(Duration.ofMinutes(1));
+        film.setDuration(1);
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new LocalDateTypeAdapter())
-                .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
                 .setPrettyPrinting()
                 .create();
 
@@ -173,11 +172,10 @@ class FilmorateApplicationTests {
         film.setName("Name");
         film.setDescription("DescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescription");
         film.setReleaseDate(LocalDate.of(2024, 1, 1));
-        film.setDuration(Duration.ofMinutes(1));
+        film.setDuration(1);
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new LocalDateTypeAdapter())
-                .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
                 .setPrettyPrinting()
                 .create();
 
@@ -201,11 +199,10 @@ class FilmorateApplicationTests {
         film.setName("Name");
         film.setDescription("Description");
         film.setReleaseDate(LocalDate.of(1895, 1, 27));
-        film.setDuration(Duration.ofMinutes(1));
+        film.setDuration(1);
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new LocalDateTypeAdapter())
-                .registerTypeAdapter(Duration.class, new DurationTypeAdapter())
                 .setPrettyPrinting()
                 .create();
 

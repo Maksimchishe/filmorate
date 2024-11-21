@@ -52,7 +52,7 @@ public class FilmController {
             throw ValidationException.releaseDateValidationException();
         }
 
-        if (film.getDuration().isNegative()) {
+        if (film.getDuration() > 0) {
             logUserController.error("Продолжительность фильма отрицательное число.");
             throw ValidationException.durationValidationException();
         }
@@ -84,7 +84,7 @@ public class FilmController {
                 throw ValidationException.releaseDateValidationException();
             }
 
-            if (film.getDuration().isNegative()) {
+            if (film.getDuration() > 0) {
                 logUserController.error("Продолжительность фильма отрицательное число.");
                 throw ValidationException.durationValidationException();
             }
