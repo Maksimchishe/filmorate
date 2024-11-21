@@ -109,7 +109,7 @@ class FilmorateApplicationTests {
         String body = new String(responseTest.body().getBytes(), StandardCharsets.UTF_8);
 
         User userTest = gson.fromJson(body, User.class);
-        assertEquals(user.getEmail(), userTest.getName());
+        assertEquals(user.getLogin(), userTest.getName());
     }
 
     @Test

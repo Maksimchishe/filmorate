@@ -66,7 +66,29 @@ public class FilmController {
 
     @PutMapping
     public ResponseEntity<Film> updateFilmById(@RequestBody Film film) {
+
         if (films.containsKey(film.getId())) {
+
+            if (film.getName().isBlank()) {
+                logUserController.error("Наименование фильма не заполнено.");
+                throw ValidationException.nameValidationException();
+            }
+
+            if (film.getDescription().length() > 200) {
+                logUserController.error("Максимальная длина описания первышает 200 символов.");
+                throw ValidationException.descriptionValidationException();
+            }
+
+            if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+                logUserController.error("Дата релиза раньше 28 декабря 1895 года.");
+                throw ValidationException.releaseDateValidationException();
+            }
+
+            if (film.getDuration().isNegative()) {
+                logUserController.error("Продолжительность фильма отрицательное число.");
+                throw ValidationException.durationValidationException();
+            }
+
             films.put(film.getId(), film);
             logUserController.info("Фильм с id {} успешно обновлен.", film.getId());
             return ResponseEntity.ok().body(films.get(film.getId()));
