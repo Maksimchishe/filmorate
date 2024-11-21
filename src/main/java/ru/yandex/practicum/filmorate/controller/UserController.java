@@ -73,7 +73,7 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
+    public User updateUser(@RequestBody User user) {
 
         if (users.containsKey(user.getId())) {
 
@@ -98,11 +98,11 @@ public class UserController {
 
             users.put(user.getId(), user);
             logUserController.info("Пользователь {} успешно обновлен.", user.getName());
-            return ResponseEntity.ok().body(users.get(user.getId()));
+            return users.get(user.getId());
         }
 
         logUserController.error("Пользователь с id {} не найден.", user.getId());
-        return ResponseEntity.noContent().build();
+        return user;
     }
 
 }
