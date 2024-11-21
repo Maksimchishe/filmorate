@@ -16,7 +16,7 @@ class DurationTypeAdapter extends TypeAdapter<Duration> {
             jsonWriter.nullValue();
             return;
         }
-        jsonWriter.value(duration.toSeconds());
+        jsonWriter.value(duration.toHours());
     }
 
     @Override
@@ -26,6 +26,6 @@ class DurationTypeAdapter extends TypeAdapter<Duration> {
             return null;
         }
 
-        return Duration.ofSeconds(Integer.parseInt(jsonReader.nextString()));
+        return Duration.ofHours(Integer.parseInt(jsonReader.nextString()));
     }
 }
