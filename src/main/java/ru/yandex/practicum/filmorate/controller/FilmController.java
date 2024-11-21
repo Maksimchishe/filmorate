@@ -65,7 +65,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilmById(@RequestBody Film film) {
+    public ResponseEntity<Film> updateFilmById(@RequestBody Film film) {
 
         if (films.containsKey(film.getId())) {
 
@@ -91,10 +91,10 @@ public class FilmController {
 
             films.put(film.getId(), film);
             logUserController.info("Фильм с id {} успешно обновлен.", film.getId());
-            return films.get(film.getId());
+            return ResponseEntity.ok().body(films.get(film.getId()));
         }
         logUserController.error("Фильм с id {} не найден.", film.getId());
-        return film;
+        return ResponseEntity.status(404).body(film);
     }
 
 }
