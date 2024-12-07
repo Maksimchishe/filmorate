@@ -23,7 +23,7 @@ public class FilmController {
     @GetMapping
     public Collection<Film> getFilms() {
 
-        if (userService.getUsers().isEmpty()) {
+        if (filmService.getFilms().isEmpty()) {
             throw NotFoundException.filmNotFoundException();
         }
 
@@ -55,7 +55,7 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
 
-        if (!filmService.getFilms().contains(film.getId())) {
+        if (filmService.getFilms().stream().noneMatch(f -> f.getId() == film.getId())) {
             throw NotFoundException.filmNotFoundException();
         }
 
@@ -81,11 +81,11 @@ public class FilmController {
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int id, @PathVariable int userId) {
 
-        if (!filmService.getFilms().contains(id)) {
+        if (filmService.getFilms().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.filmNotFoundException();
         }
 
-        if (!userService.getUsers().contains(userId)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == userId)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -95,11 +95,11 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int id, @PathVariable int userId) {
 
-        if (!filmService.getFilms().contains(id)) {
+        if (filmService.getFilms().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.filmNotFoundException();
         }
 
-        if (!userService.getUsers().contains(userId)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == userId)) {
             throw NotFoundException.idUserNotFoundException();
         }
 

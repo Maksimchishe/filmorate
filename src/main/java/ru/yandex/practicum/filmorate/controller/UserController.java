@@ -31,7 +31,7 @@ public class UserController {
     @GetMapping("/{id}")
     public User getUserById(@PathVariable int id) {
 
-        if (!userService.getUsers().contains(id)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -63,9 +63,10 @@ public class UserController {
     @PutMapping
     public User updateUser(@RequestBody User user) {
 
-        if (!userService.getUsers().contains(user.getId())) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == user.getId())) {
             throw NotFoundException.idUserNotFoundException();
         }
+
 
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw ValidationException.emailValidationException();
@@ -89,7 +90,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void deleteUserById(@PathVariable int id) {
 
-        if (!userService.getUsers().contains(id)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -99,11 +100,11 @@ public class UserController {
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable int id, @PathVariable int friendId) {
 
-        if (!userService.getUsers().contains(id)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
-        if (!userService.getUsers().contains(friendId)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == friendId)) {
             throw NotFoundException.idFriendNotFoundException();
         }
 
@@ -117,11 +118,11 @@ public class UserController {
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
 
-        if (!userService.getUsers().contains(id)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
-        if (!userService.getUsers().contains(friendId)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == friendId)) {
             throw NotFoundException.idFriendNotFoundException();
         }
 
@@ -137,35 +138,35 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Set<Integer> getFriends(@PathVariable int id) {
+    public Set<Integer> getFriendsById(@PathVariable int id) {
 
-        if (!userService.getUsers().contains(id)) {
-            throw NotFoundException.idFriendNotFoundException();
-        }
-
-        return userService.getFriends(id);
-    }
-
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<Integer> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-
-        if (!userService.getUsers().contains(id)) {
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
-        if (!userService.getUsers().contains(otherId)) {
+        return userService.getFriendsById(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{friendId}")
+    public Set<Integer> getCommonFriends(@PathVariable int id, @PathVariable int friendId) {
+
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
+            throw NotFoundException.idUserNotFoundException();
+        }
+
+        if (userService.getUsers().stream().noneMatch(f -> f.getId() == friendId)) {
             throw NotFoundException.idFriendNotFoundException();
         }
 
-        if (id == otherId) {
+        if (id == friendId) {
             throw ValidationException.idValidationException();
         }
 
-        if (userService.getCommonFriends(id, otherId).isEmpty()) {
+        if (userService.getCommonFriends(id, friendId).isEmpty()) {
             throw NotFoundException.idUserNotFoundException();
         }
 
-        return userService.getCommonFriends(id, otherId);
+        return userService.getCommonFriends(id, friendId);
     }
 
 }
