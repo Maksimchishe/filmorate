@@ -1,58 +1,51 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    private final Logger logUserController = LoggerFactory.getLogger(UserController.class);
-
-    private int id = 1;
-    private final Map<Integer, User> users = new HashMap<>();
-
-    private int nextId() {
-        return id++;
-    }
+    private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<Collection<User>> getUsers() {
-        if (users.isEmpty()) {
-            logUserController.warn("Список пользователь пуст.");
-            return ResponseEntity.notFound().build();
+    public Collection<User> getUsers() {
+
+        if (userService.getUsers().isEmpty()) {
+            throw NotFoundException.idUserNotFoundException();
         }
-        return ResponseEntity.ok().body(users.values());
+
+        return userService.getUsers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable int id) {
-        if (users.containsKey(id)) {
-            return ResponseEntity.ok().body(users.get(id));
+    public User getUserById(@PathVariable int id) {
+
+        if (!userService.getUsers().contains(id)) {
+            throw NotFoundException.idUserNotFoundException();
         }
-        logUserController.warn("Пользователь с id {} не найден.", id);
-        return ResponseEntity.notFound().build();
+
+        return userService.getUserById(id);
     }
 
     @PostMapping
     public User createUser(@RequestBody User user) {
 
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            logUserController.error("Некорректный формат электронной почты.");
             throw ValidationException.emailValidationException();
         }
 
         if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            logUserController.error("Поле Login не заполнено");
             throw ValidationException.loginValidationException();
         }
 
@@ -61,48 +54,118 @@ public class UserController {
         }
 
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            logUserController.error("Дата рождения позже настоящего времени");
             throw ValidationException.birthdayValidationException();
         }
 
-        int id = nextId();
-        user.setId(id);
-        users.put(id, user);
-        logUserController.info("Пользователь {} успешно добавлен.", user.getName());
-        return users.get(id);
+        return userService.createUser(user);
     }
 
     @PutMapping
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
+    public User updateUser(@RequestBody User user) {
 
-        if (users.containsKey(user.getId())) {
-
-            if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-                logUserController.error("Некорректный формат электронной почты.");
-                throw ValidationException.emailValidationException();
-            }
-
-            if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-                logUserController.error("Поле Login не заполнено");
-                throw ValidationException.loginValidationException();
-            }
-
-            if (user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-
-            if (user.getBirthday().isAfter(LocalDate.now())) {
-                logUserController.error("Дата рождения позже настоящего времени");
-                throw ValidationException.birthdayValidationException();
-            }
-
-            users.put(user.getId(), user);
-            logUserController.info("Пользователь {} успешно обновлен.", user.getName());
-            return ResponseEntity.ok().body(users.get(user.getId()));
+        if (!userService.getUsers().contains(user.getId())) {
+            throw NotFoundException.idUserNotFoundException();
         }
 
-        logUserController.error("Пользователь с id {} не найден.", user.getId());
-        return ResponseEntity.status(404).body(user);
+        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            throw ValidationException.emailValidationException();
+        }
+
+        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+            throw ValidationException.loginValidationException();
+        }
+
+        if (user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            throw ValidationException.birthdayValidationException();
+        }
+
+        return userService.updateUser(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUserById(@PathVariable int id) {
+
+        if (!userService.getUsers().contains(id)) {
+            throw NotFoundException.idUserNotFoundException();
+        }
+
+        userService.deleteUserById(id);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+
+        if (!userService.getUsers().contains(id)) {
+            throw NotFoundException.idUserNotFoundException();
+        }
+
+        if (!userService.getUsers().contains(friendId)) {
+            throw NotFoundException.idFriendNotFoundException();
+        }
+
+        if (id == friendId) {
+            throw ValidationException.idValidationException();
+        }
+
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+
+        if (!userService.getUsers().contains(id)) {
+            throw NotFoundException.idUserNotFoundException();
+        }
+
+        if (!userService.getUsers().contains(friendId)) {
+            throw NotFoundException.idFriendNotFoundException();
+        }
+
+        if (id == friendId) {
+            throw ValidationException.idValidationException();
+        }
+
+        if(userService.getCommonFriends(id, friendId).isEmpty()) {
+            throw NotFoundException.idUserNotFoundException();
+        }
+
+        userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public Set<Integer> getFriends(@PathVariable int id) {
+
+        if (!userService.getUsers().contains(id)) {
+            throw NotFoundException.idFriendNotFoundException();
+        }
+
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Set<Integer> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+
+        if (!userService.getUsers().contains(id)) {
+            throw NotFoundException.idUserNotFoundException();
+        }
+
+        if (!userService.getUsers().contains(otherId)) {
+            throw NotFoundException.idFriendNotFoundException();
+        }
+
+        if (id == otherId) {
+            throw ValidationException.idValidationException();
+        }
+
+        if(userService.getCommonFriends(id, otherId).isEmpty()) {
+            throw NotFoundException.idUserNotFoundException();
+        }
+
+        return userService.getCommonFriends(id, otherId);
     }
 
 }
