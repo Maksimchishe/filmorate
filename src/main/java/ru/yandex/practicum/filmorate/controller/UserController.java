@@ -147,11 +147,11 @@ public class UserController {
     public Set<Integer> getCommonFriends(@PathVariable int id, @PathVariable int friendId) {
 
         if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
-            throw NotFoundException.idUserNotFoundException();
+            throw ValidationException.idValidationException();
         }
 
         if (userService.getUsers().stream().noneMatch(f -> f.getId() == friendId)) {
-            throw NotFoundException.idFriendNotFoundException();
+            throw ValidationException.idValidationException();
         }
 
         if (id == friendId) {
