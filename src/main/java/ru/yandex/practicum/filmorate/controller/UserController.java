@@ -138,7 +138,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Set<Integer> getFriendsById(@PathVariable int id) {
+    public Set<Integer> getFriends(@PathVariable int id) {
 
         if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.idUserNotFoundException();
