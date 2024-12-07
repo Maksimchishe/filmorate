@@ -158,10 +158,6 @@ public class UserController {
             throw ValidationException.idValidationException();
         }
 
-        if (userService.getCommonFriends(id, friendId).isEmpty()) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
         return userService.getCommonFriends(id, friendId);
     }
 
