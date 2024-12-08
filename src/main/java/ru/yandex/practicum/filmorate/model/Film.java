@@ -16,7 +16,7 @@ public class Film {
     private Integer duration;
     private Set<Integer> like;
 
-    public Film () {
+    public Film() {
         this.like = new TreeSet<>();
     }
 }
