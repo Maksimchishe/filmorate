@@ -14,5 +14,9 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private Integer duration;
-    private Set<Integer> like = new TreeSet<>();
+    private Set<Integer> like;
+
+    private Film () {
+        this.like = new TreeSet<>();
+    }
 }

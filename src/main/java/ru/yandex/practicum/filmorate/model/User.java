@@ -14,5 +14,9 @@ public class User {
     private String login;
     private String name = "";
     private LocalDate birthday;
-    private Set<Integer> friendsId = new TreeSet<>();
+    private Set<Integer> friendsId;
+
+    private User() {
+        this.friendsId = new TreeSet<>();
+    }
 }
