@@ -16,7 +16,7 @@ public class User {
     private LocalDate birthday;
     private Set<Integer> friendsId;
 
-    private User() {
+    public User() {
         this.friendsId = new TreeSet<>();
     }
 }
