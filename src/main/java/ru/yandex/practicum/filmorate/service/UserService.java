@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -65,22 +66,28 @@ public class UserService {
         userStorage.updateUser(friend);
     }
 
-    public Set<Integer> getFriendsById(int id) {
+    public Set<User> getFriendsById(int id) {
 
         User user = userStorage.getUserById(id);
-        return user.getFriendsId();
+        Set<Integer> setFriends = new TreeSet<>(user.getFriendsId());
+
+        return setFriends.stream()
+                .map(userStorage::getUserById)
+                .collect(Collectors.toSet());
     }
 
-    public Set<Integer> getCommonFriends(int id, int friendId) {
+    public Set<User> getCommonFriends(int id, int friendId) {
 
         User user = userStorage.getUserById(id);
         Set<Integer> setUsers = new TreeSet<>(user.getFriendsId());
 
         User friend = userStorage.getUserById(friendId);
         Set<Integer> setFriends = new TreeSet<>(friend.getFriendsId());
-
         setUsers.retainAll(setFriends);
-        return setUsers;
+
+        return setUsers.stream()
+                .map(userStorage::getUserById)
+                .collect(Collectors.toSet());
     }
 
 }

@@ -134,7 +134,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Set<Integer> getFriends(@PathVariable int id) {
+    public Set<User> getFriends(@PathVariable int id) {
 
         if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
             throw NotFoundException.idUserNotFoundException();
@@ -144,7 +144,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends/common/{friendId}")
-    public Set<Integer> getCommonFriends(@PathVariable int id, @PathVariable int friendId) {
+    public Set<User> getCommonFriends(@PathVariable int id, @PathVariable int friendId) {
 
         if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
             throw ValidationException.idValidationException();
