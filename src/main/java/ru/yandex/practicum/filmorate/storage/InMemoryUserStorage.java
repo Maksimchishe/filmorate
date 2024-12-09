@@ -9,9 +9,7 @@ import java.util.Map;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
-
     private int id = 1;
-
     private final Map<Integer, User> users = new HashMap<>();
 
     @Override
@@ -26,7 +24,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-
         int id = nextId();
         user.setId(id);
         users.put(id, user);
@@ -35,19 +32,16 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-
         users.put(user.getId(), user);
         return users.get(user.getId());
     }
 
     @Override
     public void deleteUserById(int id) {
-
         users.remove(id);
     }
 
     private int nextId() {
         return id++;
     }
-
 }

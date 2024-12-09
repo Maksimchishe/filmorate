@@ -16,23 +16,16 @@ import java.util.List;
 @RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
-
     private final FilmService filmService;
     private final UserService userService;
 
     @GetMapping
     public Collection<Film> getFilms() {
-
-        if (filmService.getFilms().isEmpty()) {
-            throw NotFoundException.filmNotFoundException();
-        }
-
         return filmService.getFilms();
     }
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
-
         if (film.getName().isBlank()) {
             throw ValidationException.nameValidationException();
         }
@@ -54,8 +47,7 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
-
-        if (filmService.getFilms().stream().noneMatch(f -> f.getId() == film.getId())) {
+        if (validatorFilm(film.getId())) {
             throw NotFoundException.filmNotFoundException();
         }
 
@@ -80,12 +72,11 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int id, @PathVariable int userId) {
-
-        if (filmService.getFilms().stream().noneMatch(f -> f.getId() == id)) {
+        if (validatorFilm(id)) {
             throw NotFoundException.filmNotFoundException();
         }
 
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == userId)) {
+        if (validatorUser(userId)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -94,12 +85,11 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int id, @PathVariable int userId) {
-
-        if (filmService.getFilms().stream().noneMatch(f -> f.getId() == id)) {
+        if (validatorFilm(id)) {
             throw NotFoundException.filmNotFoundException();
         }
 
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == userId)) {
+        if (validatorUser(userId)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -108,12 +98,14 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> getPopularFilm(@RequestParam(required = false) Integer count) {
-
-        if (userService.getUsers().isEmpty()) {
-            throw NotFoundException.filmNotFoundException();
-        }
-
         return filmService.getPopularFilm(count);
     }
 
+    private boolean validatorUser(int id) {
+        return userService.getUsers().stream().noneMatch(f -> f.getId() == id);
+    }
+
+    private boolean validatorFilm(int id) {
+        return userService.getUsers().stream().noneMatch(f -> f.getId() == id);
+    }
 }

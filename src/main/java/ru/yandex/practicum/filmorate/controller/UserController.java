@@ -15,23 +15,16 @@ import java.util.Set;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-
     private final UserService userService;
 
     @GetMapping
     public Collection<User> getUsers() {
-
-        if (userService.getUsers().isEmpty()) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
         return userService.getUsers();
     }
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable int id) {
-
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
+        if (validatorUser(id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -40,7 +33,6 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             throw ValidationException.emailValidationException();
         }
@@ -62,8 +54,7 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
-
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == user.getId())) {
+        if (validatorUser(user.getId())) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -89,8 +80,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public void deleteUserById(@PathVariable int id) {
-
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
+        if (validatorUser(id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -99,12 +89,11 @@ public class UserController {
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable int id, @PathVariable int friendId) {
-
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
+        if (validatorUser(id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == friendId)) {
+        if (validatorUser(friendId)) {
             throw NotFoundException.idFriendNotFoundException();
         }
 
@@ -117,12 +106,11 @@ public class UserController {
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
-
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
+        if (validatorUser(id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == friendId)) {
+        if (validatorUser(friendId)) {
             throw NotFoundException.idFriendNotFoundException();
         }
 
@@ -135,8 +123,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends")
     public Set<User> getFriends(@PathVariable int id) {
-
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
+        if (validatorUser(id)) {
             throw NotFoundException.idUserNotFoundException();
         }
 
@@ -145,12 +132,11 @@ public class UserController {
 
     @GetMapping("/{id}/friends/common/{friendId}")
     public Set<User> getCommonFriends(@PathVariable int id, @PathVariable int friendId) {
-
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == id)) {
+        if (validatorUser(id)) {
             throw ValidationException.idValidationException();
         }
 
-        if (userService.getUsers().stream().noneMatch(f -> f.getId() == friendId)) {
+        if (validatorUser(friendId)) {
             throw ValidationException.idValidationException();
         }
 
@@ -161,4 +147,7 @@ public class UserController {
         return userService.getCommonFriends(id, friendId);
     }
 
+    private boolean validatorUser(int id) {
+        return userService.getUsers().stream().noneMatch(f -> f.getId() == id);
+    }
 }

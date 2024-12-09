@@ -9,9 +9,7 @@ import java.util.Map;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-
     private int id = 1;
-
     private final Map<Integer, Film> films = new HashMap<>();
 
     private int nextId() {
@@ -25,7 +23,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film createFilm(Film film) {
-
         int id = nextId();
         film.setId(id);
         films.put(film.getId(), film);
@@ -34,7 +31,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-
         films.put(film.getId(), film);
         return film;
     }

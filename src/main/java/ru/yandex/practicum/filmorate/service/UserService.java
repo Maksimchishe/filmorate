@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
     private final UserStorage userStorage;
 
     public Collection<User> getUsers() {
@@ -37,7 +36,6 @@ public class UserService {
     }
 
     public void addFriend(int id, int friendId) {
-
         User user = userStorage.getUserById(id);
         Set<Integer> setUser = user.getFriendsId();
         setUser.add(friendId);
@@ -52,7 +50,6 @@ public class UserService {
     }
 
     public void deleteFriend(int id, int friendId) {
-
         User user = userStorage.getUserById(id);
         Set<Integer> setUser = user.getFriendsId();
         setUser.remove(friendId);
@@ -67,7 +64,6 @@ public class UserService {
     }
 
     public Set<User> getFriendsById(int id) {
-
         User user = userStorage.getUserById(id);
         Set<Integer> setFriends = new TreeSet<>(user.getFriendsId());
 
@@ -77,7 +73,6 @@ public class UserService {
     }
 
     public Set<User> getCommonFriends(int id, int friendId) {
-
         User user = userStorage.getUserById(id);
         Set<Integer> setUsers = new TreeSet<>(user.getFriendsId());
 

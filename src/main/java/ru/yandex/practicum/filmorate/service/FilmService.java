@@ -31,7 +31,6 @@ public class FilmService {
     }
 
     public void addLike(int id, int userId) {
-
         Film film = filmStorage.getFilmById(id);
         Set<Integer> setLike = film.getLike();
         setLike.add(userId);
@@ -40,7 +39,6 @@ public class FilmService {
     }
 
     public void deleteLike(int id, int userId) {
-
         Film film = filmStorage.getFilmById(id);
         Set<Integer> setLike = film.getLike();
         setLike.remove(userId);
@@ -49,7 +47,6 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilm(int count) {
-
         Set<Film> films = new TreeSet<>(new PopularComparator());
         films.addAll(filmStorage.getFilms());
 

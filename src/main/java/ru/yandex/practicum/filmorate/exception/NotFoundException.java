@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.exception;
 
 public class NotFoundException extends RuntimeException {
-
     private static final String MSG_FILM_NOT_FOUND = "Фильм не найден.";
     private static final String MSG_ID_USER = "Пользователь не найден.";
     private static final String MSG_ID_FRIEND = "Друг не найден.";
