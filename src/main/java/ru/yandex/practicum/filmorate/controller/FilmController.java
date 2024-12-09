@@ -106,6 +106,6 @@ public class FilmController {
     }
 
     private boolean validatorFilm(int id) {
-        return userService.getUsers().stream().noneMatch(f -> f.getId() == id);
+        return filmService.getFilms().stream().noneMatch(f -> f.getId() == id);
     }
 }
