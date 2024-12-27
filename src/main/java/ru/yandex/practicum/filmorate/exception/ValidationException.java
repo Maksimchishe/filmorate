@@ -9,6 +9,11 @@ public class ValidationException extends RuntimeException {
     private static final String MSG_EMAIL = "Электронная почта не может быть пустой и должна содержать символ @.";
     private static final String MSG_LOGIN = "Логин не может быть пустым и содержать пробелы.";
     private static final String MSG_BIRTHDAY = "Дата рождения не может быть в будущем.";
+    private static final String MSG_ID_ERROR = "ID равны.";
+
+    public ValidationException(String msg) {
+        super(msg);
+    }
 
     public static ValidationException nameValidationException() {
         return new ValidationException(MSG_NAME);
@@ -38,8 +43,8 @@ public class ValidationException extends RuntimeException {
         return new ValidationException(MSG_BIRTHDAY);
     }
 
-    public ValidationException(String msg) {
-        super(msg);
+    public static ValidationException idValidationException() {
+        return new ValidationException(MSG_ID_ERROR);
     }
 
 }
