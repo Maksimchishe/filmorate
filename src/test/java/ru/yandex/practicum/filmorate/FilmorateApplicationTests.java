@@ -23,16 +23,15 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Import({DatabaseUserStorage.class
-        , UserRowMapper.class
-        , DatabaseFilmStorage.class
-        , FilmRowMapper.class
-        , DatabaseGenreStorage.class
-        , GenreRowMapper.class
-        , DatabaseMpaStorage.class
-        , MpaRowMapper.class})
+@Import({DatabaseUserStorage.class,
+        UserRowMapper.class,
+        DatabaseFilmStorage.class,
+        FilmRowMapper.class,
+        DatabaseGenreStorage.class,
+        GenreRowMapper.class,
+        DatabaseMpaStorage.class,
+        MpaRowMapper.class})
 @Transactional
-@SuppressWarnings("ALL")
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -146,7 +145,6 @@ class FilmorateApplicationTests {
         assertThat(userOptional)
                 .isPresent()
                 .usingRecursiveComparison()
-                //.ignoringExpectedNullFields()
                 .isEqualTo(userOptional);
     }
 
