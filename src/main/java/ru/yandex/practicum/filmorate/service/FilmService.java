@@ -3,63 +3,56 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FilmService {
+    private final FilmDbStorage filmStorage;
+    private final GenreDbStorage genreDbStorage;
 
-    private final FilmStorage filmStorage;
-
-    public Collection<Film> getFilms() {
+    public Set<Optional<Film>> getFilms() {
         return filmStorage.getFilms();
     }
 
-    public Film getFilmById(int id) {
+    public Optional<Film> getFilmById(long id) {
         return filmStorage.getFilmById(id);
     }
 
-    public Film createFilm(Film film) {
+    public Optional<Film> createFilm(Film film) {
         return filmStorage.createFilm(film);
     }
 
-    public Film updateFilm(Film film) {
+    public Optional<Film> updateFilm(Film film) {
         return filmStorage.updateFilm(film);
     }
 
-    public void addLike(int id, int userId) {
-        Film film = filmStorage.getFilmById(id);
-        Set<Integer> setLike = film.getLike();
-        setLike.add(userId);
-        film.setLike(setLike);
-        filmStorage.updateFilm(film);
+    public void deleteFilmById(long id) {
+        filmStorage.deleteFilmById(id);
     }
 
-    public void deleteLike(int id, int userId) {
-        Film film = filmStorage.getFilmById(id);
-        Set<Integer> setLike = film.getLike();
-        setLike.remove(userId);
-        film.setLike(setLike);
-        filmStorage.updateFilm(film);
+    public void addLike(long id, long userId) {
+        filmStorage.addLike(id, userId);
     }
 
-    public List<Film> getPopularFilm(int count) {
-        Set<Film> films = new TreeSet<>(new PopularComparator());
-        films.addAll(filmStorage.getFilms());
-
-        return films.stream()
-                .limit(Objects.requireNonNullElse(count, 10))
-                .collect(Collectors.toList());
+    public void deleteLike(long id, long userId) {
+        filmStorage.deleteLike(id, userId);
     }
 
-    static class PopularComparator implements Comparator<Film> {
-        @Override
-        public int compare(Film f1, Film f2) {
-            return Integer.compare(f2.getLike().size(), f1.getLike().size());
-        }
+    public Set<Optional<Film>> getPopularFilm(long count) {
+        return filmStorage.getPopularFilm(count);
+    }
+
+    public LinkedHashSet<Genre> getGenres() {
+        return genreDbStorage.getGenres();
+    }
+
+    public Optional<Genre> getGenreById(long id) {
+        return genreDbStorage.getGenreById(id);
     }
 }
 
