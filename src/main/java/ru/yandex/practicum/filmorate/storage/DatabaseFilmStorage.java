@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("ALL")
 @Repository
 @RequiredArgsConstructor
 public class DatabaseFilmStorage implements FilmDbStorage {
@@ -71,6 +70,7 @@ public class DatabaseFilmStorage implements FilmDbStorage {
 
         //noinspection DataFlowIssue
         film.setId(keyHolder.getKeyAs(Integer.class));
+        //noinspection OptionalGetWithoutIsPresent
         film.setMpa(mpaDbStorage.getMpaById(film.getMpa().getId()).get());
 
         if (film.getGenres() != null) {
@@ -89,7 +89,9 @@ public class DatabaseFilmStorage implements FilmDbStorage {
             film.setGenres(genreDbStorage.getGenresUserById(film.getId()).stream()
                     .sorted(Comparator.comparing(Genre::getId))
                     .collect(Collectors.toCollection(LinkedHashSet::new)));
-        } else {film.setGenres(new LinkedHashSet<>());}
+        } else {
+            film.setGenres(new LinkedHashSet<>());
+        }
         return Optional.of(film);
     }
 
