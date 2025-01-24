@@ -2,9 +2,10 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.mappers.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
@@ -14,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,55 +25,57 @@ public class FilmService {
     private final MpaDbStorage mpaDbStorage;
     private final GenreDbStorage genreDbStorage;
 
-    public List<Film> getFilms() {
-        return filmStorage.getFilms();
+    public Set<FilmDto> getFilms() {
+        return filmStorage.getFilms().stream()
+                .map(FilmMapper::toDto)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public Film getFilmById(long id) {
-        return filmStorage.getFilmById(id)
-                .orElseThrow(() -> new ValidationException("Фтльм не найден."));
+    public FilmDto getFilmById(long id) {
+        return FilmMapper.toDto(filmStorage.getFilmById(id)
+                .orElseThrow(() -> new ValidationException("Фтльм не найден.")));
     }
 
-    public Film createFilm(Film film) {
-        if (film.getName().isBlank()) {
+    public FilmDto createFilm(FilmDto filmDto) {
+        if (filmDto.getName().isBlank()) {
             throw new ValidationException("Поле name не может быть пустым.");
         }
-        if (film.getDescription().length() > 200) {
+        if (filmDto.getDescription().length() > 200) {
             throw new ValidationException("Поле description не должно превышать 200 символов.");
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (filmDto.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Дата релиза не может быть раньше 1895-12-28.");
         }
-        if (film.getDuration() < 0) {
+        if (filmDto.getDuration() < 0) {
             throw new ValidationException("Время продолжительности фильма не может быть < 0.");
         }
-        mpaDbStorage.getMpaById(film.getMpa().getId())
+        mpaDbStorage.getMpaById(filmDto.getMpa().getId())
                 .orElseThrow(() -> new ValidationException("Рейтинг не найден."));
-        if (validatorGenres(film.getGenres())) {
+        if (validatorGenres(filmDto.getGenres())) {
             throw new ValidationException("Жанр не найден.");
         }
-        return filmStorage.createFilm(film);
+        return FilmMapper.toDto(filmStorage.createFilm(FilmMapper.toModel(filmDto)));
     }
 
-    public Film updateFilm(Film film) {
-        if (film.getName().isBlank()) {
+    public FilmDto updateFilm(FilmDto filmDto) {
+        if (filmDto.getName().isBlank()) {
             throw new ValidationException("Поле name не может быть пустым.");
         }
-        if (film.getDescription().length() > 200) {
+        if (filmDto.getDescription().length() > 200) {
             throw new ValidationException("Поле description не должно превышать 200 символов.");
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (filmDto.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Дата релиза не может быть раньше 1895-12-28.");
         }
-        if (film.getDuration() < 0) {
+        if (filmDto.getDuration() < 0) {
             throw new ValidationException("Время продолжительности фильма не может быть < 0.");
         }
-        mpaDbStorage.getMpaById(film.getMpa().getId())
+        mpaDbStorage.getMpaById(filmDto.getMpa().getId())
                 .orElseThrow(() -> new ValidationException("Рейтинг не найден."));
-        if (validatorGenres(film.getGenres())) {
+        if (validatorGenres(filmDto.getGenres())) {
             throw new ValidationException("Жанр не найден.");
         }
-        return filmStorage.updateFilm(film);
+        return FilmMapper.toDto(filmStorage.updateFilm(FilmMapper.toModel(filmDto)));
     }
 
     public void deleteFilmById(long id) {
@@ -96,8 +100,10 @@ public class FilmService {
         filmStorage.deleteLike(id, userId);
     }
 
-    public Set<Film> getPopularFilm(long count) {
-        return filmStorage.getPopularFilm(count);
+    public Set<FilmDto> getPopularFilm(long count) {
+        return filmStorage.getPopularFilm(count).stream()
+                .map(FilmMapper::toDto)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Set<Genre> getGenres() {

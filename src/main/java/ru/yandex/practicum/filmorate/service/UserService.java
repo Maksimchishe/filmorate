@@ -2,60 +2,67 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserDbStorage userStorage;
 
-    public List<User> getUsers() {
-        return userStorage.getUsers();
+    public Set<UserDto> getUsers() {
+        return userStorage.getUsers().stream()
+                .map(UserMapper::toDto)
+                .sorted(Comparator.comparing(UserDto::getId))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public User getUserById(long id) {
-        return userStorage.getUserById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден."));
+    public UserDto getUserById(long id) {
+        return UserMapper.toDto(userStorage.getUserById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден.")));
     }
 
-    public User createUser(User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+    public UserDto createUser(UserDto userDto) {
+        if (userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
             throw new ValidationException("Некорректная форма поля email.");
         }
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        if (userDto.getLogin().isBlank() || userDto.getLogin().contains(" ")) {
             throw new ValidationException("Некорректная форма поля login.");
         }
-        if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
+        if (userDto.getName().isBlank()) {
+            userDto.setName(userDto.getLogin());
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
+        if (userDto.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть в будующем");
         }
-        return userStorage.createUser(user);
+        return UserMapper.toDto(userStorage.createUser(UserMapper.toModel(userDto)));
     }
 
-    public User updateUser(User user) {
-        userStorage.getUserById(user.getId())
+    public UserDto updateUser(UserDto userDto) {
+        userStorage.getUserById(userDto.getId())
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден."));
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+        if (userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
             throw new ValidationException("Некорректная форма поля email.");
         }
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+        if (userDto.getLogin().isBlank() || userDto.getLogin().contains(" ")) {
             throw new ValidationException("Некорректная форма поля login.");
         }
-        if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
+        if (userDto.getName().isBlank()) {
+            userDto.setName(userDto.getLogin());
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
+        if (userDto.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть в будующем");
         }
-        return userStorage.updateUser(user);
+        return UserMapper.toDto(userStorage.updateUser(UserMapper.toModel(userDto)));
     }
 
     public void deleteUserById(long id) {
@@ -86,13 +93,16 @@ public class UserService {
         userStorage.deleteFriend(id, friendId);
     }
 
-    public List<User> getFriends(long id) {
+    public Set<UserDto> getFriends(long id) {
         userStorage.getUserById(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден."));
-        return userStorage.getFriends(id);
+        return userStorage.getFriends(id).stream()
+                .map(UserMapper::toDto)
+                .sorted(Comparator.comparing(UserDto::getId))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public List<User> getCommonFriends(long id, long friendId) {
+    public Set<UserDto> getCommonFriends(long id, long friendId) {
         userStorage.getUserById(id)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден."));
         userStorage.getUserById(friendId)
@@ -100,6 +110,9 @@ public class UserService {
         if (id == friendId) {
             throw new NotFoundException("ID пользователя и друга равны.");
         }
-        return userStorage.getCommonFriends(id, friendId);
+        return userStorage.getCommonFriends(id, friendId).stream()
+                .map(UserMapper::toDto)
+                .sorted(Comparator.comparing(UserDto::getId).reversed())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
