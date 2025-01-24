@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.dto;
 
 import lombok.Data;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 public class UserDto {
@@ -9,5 +9,5 @@ public class UserDto {
     private String email;
     private String login;
     private String name;
-    private Date birthday;
+    private LocalDate birthday;
 }

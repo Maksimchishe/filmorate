@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -19,11 +18,9 @@ public class DatabaseUserStorage implements UserDbStorage {
     private final UserRowMapper userRowMapper;
 
     @Override
-    public Set<Optional<User>> getUsers() {
+    public List<User> getUsers() {
         String sqlQuery = "SELECT id, email, login, name, birthday FROM Users ORDER BY id";
-        return jdbc.query(sqlQuery, userRowMapper).stream()
-                .map(Optional::of)
-                .collect(Collectors.toSet());
+        return jdbc.query(sqlQuery, userRowMapper);
     }
 
     @Override
@@ -39,7 +36,7 @@ public class DatabaseUserStorage implements UserDbStorage {
     }
 
     @Override
-    public Optional<User> createUser(User user) {
+    public User createUser(User user) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("email", user.getEmail());
         params.addValue("login", user.getLogin());
@@ -49,11 +46,11 @@ public class DatabaseUserStorage implements UserDbStorage {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(sqlQuery, params, keyHolder, new String[]{"id"});
         user.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
-        return Optional.of(user);
+        return user;
     }
 
     @Override
-    public Optional<User> updateUser(User user) {
+    public User updateUser(User user) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", user.getId());
         params.addValue("email", user.getEmail());
@@ -64,7 +61,7 @@ public class DatabaseUserStorage implements UserDbStorage {
                 UPDATE Users SET email = :email, login = :login, name = :name, birthday = :birthday WHERE id = :id
                 """;
         jdbc.update(sqlQuery, params);
-        return Optional.of(user);
+        return user;
     }
 
     @Override
@@ -94,7 +91,7 @@ public class DatabaseUserStorage implements UserDbStorage {
     }
 
     @Override
-    public Set<Optional<User>> getFriends(long id) {
+    public List<User> getFriends(long id) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("user_id", id);
         String sqlQuery = """
@@ -105,25 +102,18 @@ public class DatabaseUserStorage implements UserDbStorage {
                 FROM Friends
                 WHERE user_id = :user_id
                 )""";
-        return jdbc.query(sqlQuery, params, userRowMapper).stream()
-                .map(Optional::of)
-                .collect(Collectors.toSet());
+        return jdbc.query(sqlQuery, params, userRowMapper);
     }
 
     @Override
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public Set<Optional<User>> getCommonFriends(long id, long friendId) {
-        List<Long> usersCollection = new ArrayList<>(getFriends(id).stream()
-                .map(Optional::get)
-                .map(User::getId)
-                .toList());
-        List<Long> friendsCollection = new ArrayList<>(getFriends(friendId).stream()
-                .map(Optional::get)
-                .map(User::getId)
-                .toList());
-        usersCollection.retainAll(friendsCollection);
-        return usersCollection.stream()
+    public List<User> getCommonFriends(long id, long friendId) {
+        List<Long> usersList = new ArrayList<>(getFriends(id).stream().map(User::getId).toList());
+        List<Long> friendsList = getFriends(friendId).stream().map(User::getId).toList();
+        usersList.retainAll(friendsList);
+        return usersList.stream()
                 .map(this::getUserById)
-                .collect(Collectors.toSet());
+                .map(Optional::get)
+                .toList();
     }
 }

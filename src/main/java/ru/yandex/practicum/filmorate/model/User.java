@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 public class User {
@@ -9,7 +9,7 @@ public class User {
     private String email;
     private String login;
     private String name;
-    private Date birthday;
+    private LocalDate birthday;
 
     public User() {
         this.name = "";

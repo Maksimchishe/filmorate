@@ -7,9 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -19,11 +17,11 @@ public class DatabaseMpaStorage implements MpaDbStorage {
     private final MpaRowMapper mpaRowMapper;
 
     @Override
-    public Set<Optional<Mpa>> getMpas() {
+    public Set<Mpa> getMpas() {
         String sqlQuery = "SELECT id, name FROM Ratings";
         return jdbc.query(sqlQuery, mpaRowMapper).stream()
-                .map(Optional::of)
-                .collect(Collectors.toSet());
+                .sorted(Comparator.comparing(Mpa::getId))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override

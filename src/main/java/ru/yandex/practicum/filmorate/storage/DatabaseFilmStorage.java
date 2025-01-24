@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
@@ -14,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("ALL")
 @Repository
 @RequiredArgsConstructor
 public class DatabaseFilmStorage implements FilmDbStorage {
@@ -23,13 +25,11 @@ public class DatabaseFilmStorage implements FilmDbStorage {
     private final GenreDbStorage genreDbStorage;
 
     @Override
-    public Set<Optional<Film>> getFilms() {
+    public List<Film> getFilms() {
         String sqlQuery = """
                 SELECT id, name, description, releaseDate, duration, mpa_id FROM Films
                 """;
-        return jdbc.query(sqlQuery, filmRowMapper).stream()
-                .map(Optional::of)
-                .collect(Collectors.toSet());
+        return jdbc.query(sqlQuery, filmRowMapper);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class DatabaseFilmStorage implements FilmDbStorage {
     }
 
     @Override
-    public Optional<Film> createFilm(Film film) {
+    public Film createFilm(Film film) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("name", film.getName());
         params.addValue("description", film.getDescription());
@@ -68,9 +68,7 @@ public class DatabaseFilmStorage implements FilmDbStorage {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(sqlFilms, params, keyHolder, new String[]{"id"});
 
-        //noinspection DataFlowIssue
         film.setId(keyHolder.getKeyAs(Integer.class));
-        //noinspection OptionalGetWithoutIsPresent
         film.setMpa(mpaDbStorage.getMpaById(film.getMpa().getId()).get());
 
         if (film.getGenres() != null) {
@@ -89,14 +87,12 @@ public class DatabaseFilmStorage implements FilmDbStorage {
             film.setGenres(genreDbStorage.getGenresUserById(film.getId()).stream()
                     .sorted(Comparator.comparing(Genre::getId))
                     .collect(Collectors.toCollection(LinkedHashSet::new)));
-        } else {
-            film.setGenres(new LinkedHashSet<>());
         }
-        return Optional.of(film);
+        return film;
     }
 
     @Override
-    public Optional<Film> updateFilm(Film film) {
+    public Film updateFilm(Film film) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", film.getId());
         params.addValue("name", film.getName());
@@ -115,7 +111,30 @@ public class DatabaseFilmStorage implements FilmDbStorage {
                     WHERE id = :id
                 """;
         jdbc.update(sqlQuery, params);
-        return Optional.of(film);
+
+        if (film.getMpa().getId() != getFilmById(film.getId()).get().getMpa().getId()) {
+            throw new NotFoundException("Неверный рейтинг");
+        }
+        film.setMpa(mpaDbStorage.getMpaById(film.getMpa().getId()).get());
+
+        if (film.getGenres() != null) {
+            String sqlGenres = """
+                    INSERT INTO Genres_save(user_id, genre_id)
+                    VALUES (:user_id, :genre_id)
+                    """;
+            SqlParameterSource[] mapGenres = film.getGenres().stream()
+                    .map(e -> new MapSqlParameterSource()
+                            .addValue("user_id", film.getId())
+                            .addValue("genre_id", e.getId())
+                    )
+                    .toArray(SqlParameterSource[]::new);
+            jdbc.batchUpdate(sqlGenres, mapGenres);
+
+            film.setGenres(genreDbStorage.getGenresUserById(film.getId()).stream()
+                    .sorted(Comparator.comparing(Genre::getId))
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
+        }
+        return film;
     }
 
     @Override
@@ -149,8 +168,7 @@ public class DatabaseFilmStorage implements FilmDbStorage {
     }
 
     @Override
-    public Set<Optional<Film>> getPopularFilm(long count) {
-
+    public Set<Film> getPopularFilm(long count) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("limitMax", count);
         String sqlQuery = """
@@ -162,7 +180,6 @@ public class DatabaseFilmStorage implements FilmDbStorage {
                 LIMIT :limitMax
                 """;
         return jdbc.queryForStream(sqlQuery, params, filmRowMapper)
-                .map(Optional::of)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

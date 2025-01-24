@@ -17,12 +17,13 @@ import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("ALL")
 @Import({DatabaseUserStorage.class,
         UserRowMapper.class,
         DatabaseFilmStorage.class,
@@ -45,7 +46,7 @@ class FilmorateApplicationTests {
         user.setEmail("test1@email.com");
         user.setLogin("TestLogin1");
         user.setName("NameTest1");
-        user.setBirthday(Date.valueOf("2000-01-01"));
+        user.setBirthday(LocalDate.of(2000,01,01));
         return user;
     }
 
@@ -55,7 +56,7 @@ class FilmorateApplicationTests {
         user.setEmail("test2@email.com");
         user.setLogin("TestLogin2");
         user.setName("NameTest2");
-        user.setBirthday(Date.valueOf("2000-02-02"));
+        user.setBirthday(LocalDate.of(2000,02,02));
         return user;
     }
 
@@ -65,7 +66,7 @@ class FilmorateApplicationTests {
         user.setEmail("test3@email.com");
         user.setLogin("TestLogin3");
         user.setName("NameTest3");
-        user.setBirthday(Date.valueOf("2000-03-03"));
+        user.setBirthday(LocalDate.of(2000,03,03));
         return user;
     }
 
@@ -74,11 +75,12 @@ class FilmorateApplicationTests {
         film.setId(1);
         film.setName("name1");
         film.setDescription("description1");
-        film.setReleaseDate(Date.valueOf("2000-01-01"));
+        film.setReleaseDate(LocalDate.of(2000,01,01));
         film.setDuration(10);
         Mpa mpa = new Mpa();
         mpa.setId(1);
         film.setMpa(mpa);
+        film.setGenres(new LinkedHashSet<>());
         return film;
     }
 
@@ -87,11 +89,12 @@ class FilmorateApplicationTests {
         film.setId(2);
         film.setName("name2");
         film.setDescription("description2");
-        film.setReleaseDate(Date.valueOf("2000-02-02"));
+        film.setReleaseDate(LocalDate.of(2000,02,02));
         film.setDuration(20);
         Mpa mpa = new Mpa();
         mpa.setId(2);
         film.setMpa(mpa);
+        film.setGenres(new LinkedHashSet<>());
         return film;
     }
 
@@ -100,11 +103,12 @@ class FilmorateApplicationTests {
         film.setId(3);
         film.setName("name3");
         film.setDescription("description3");
-        film.setReleaseDate(Date.valueOf("2000-03-03"));
+        film.setReleaseDate(LocalDate.of(2000,03,03));
         film.setDuration(30);
         Mpa mpa = new Mpa();
         mpa.setId(3);
         film.setMpa(mpa);
+        film.setGenres(new LinkedHashSet<>());
         return film;
     }
 
@@ -113,16 +117,18 @@ class FilmorateApplicationTests {
         User testUser1 = getTestUser1();
         User testUser2 = getTestUser2();
         User testUser3 = getTestUser3();
+
+        Set<User> users = new LinkedHashSet<>();
+        users.add(testUser1);
+        users.add(testUser2);
+        users.add(testUser3);
+
         userStorage.createUser(testUser1);
         userStorage.createUser(testUser2);
         userStorage.createUser(testUser3);
-        Set<Optional<User>> ranges = userStorage.getUsers();
 
-        Set<Optional<User>> users = new LinkedHashSet<>();
-        users.add(Optional.of(testUser1));
-        users.add(Optional.of(testUser2));
-        users.add(Optional.of(testUser3));
-
+        Set<User> ranges = new LinkedHashSet<>(userStorage.getUsers());
+        assertEquals(3, ranges.size());
         assertEquals(users, ranges);
     }
 
@@ -141,9 +147,8 @@ class FilmorateApplicationTests {
     @Test
     public void testCreateUser() {
         User testUser1 = getTestUser1();
-        Optional<User> userOptional = userStorage.createUser(testUser1);
+        User userOptional = userStorage.createUser(testUser1);
         assertThat(userOptional)
-                .isPresent()
                 .usingRecursiveComparison()
                 .isEqualTo(userOptional);
     }
@@ -153,10 +158,8 @@ class FilmorateApplicationTests {
         User testUser1 = getTestUser1();
         User testUser2 = getTestUser2();
         userStorage.createUser(testUser1);
-        Optional<User> updateOptional = userStorage.updateUser(testUser2);
+        User updateOptional = userStorage.updateUser(testUser2);
         assertThat(updateOptional)
-                .isPresent()
-                .get()
                 .usingRecursiveComparison()
                 .isEqualTo(testUser2);
     }
@@ -180,11 +183,9 @@ class FilmorateApplicationTests {
         assertEquals(2, userStorage.getUsers().size());
 
         userStorage.addFriend(testUser1.getId(), testUser2.getId());
-        Set<Optional<User>> friends = userStorage.getFriends(testUser1.getId());
-        Optional<User> friend = friends.stream().findFirst().get();
+        List<User> friends = userStorage.getFriends(testUser1.getId());
+        User friend = friends.stream().findFirst().get();
         assertThat(friend)
-                .isPresent()
-                .get()
                 .usingRecursiveComparison()
                 .isEqualTo(testUser2);
 
@@ -207,11 +208,9 @@ class FilmorateApplicationTests {
         userStorage.addFriend(testUser1.getId(), testUser3.getId());
         userStorage.addFriend(testUser2.getId(), testUser3.getId());
 
-        Set<Optional<User>> commonFriends = userStorage.getCommonFriends(testUser1.getId(), testUser2.getId());
-        Optional<User> friends = commonFriends.stream().findFirst().get();
+        List<User> commonFriends = userStorage.getCommonFriends(testUser1.getId(), testUser2.getId());
+        User friends = commonFriends.stream().findFirst().get();
         assertThat(friends)
-                .isPresent()
-                .get()
                 .usingRecursiveComparison()
                 .isEqualTo(testUser3);
     }
@@ -227,13 +226,13 @@ class FilmorateApplicationTests {
         filmStorage.createFilm(testFilm3);
         assertEquals(3, filmStorage.getFilms().size());
 
-        Set<Optional<Film>> ranges = filmStorage.getFilms();
+        LinkedHashSet<Film> films = new LinkedHashSet<>();
+        films.add(testFilm1);
+        films.add(testFilm2);
+        films.add(testFilm3);
 
-        LinkedHashSet<Optional<Film>> films = new LinkedHashSet<>();
-        films.add(Optional.of(testFilm3));
-        films.add(Optional.of(testFilm2));
-        films.add(Optional.of(testFilm1));
-
+        Set<Film> ranges = new LinkedHashSet<>(filmStorage.getFilms());
+        assertEquals(3, films.size());
         assertEquals(films, ranges);
     }
 
@@ -254,11 +253,9 @@ class FilmorateApplicationTests {
     @Test
     public void testCreateFilm() {
         Film testFilm1 = getTestFilm1();
-        Optional<Film> createFilm = filmStorage.createFilm(testFilm1);
+        Film createFilm = filmStorage.createFilm(testFilm1);
         assertEquals(1, filmStorage.getFilms().size());
         assertThat(createFilm)
-                .isPresent()
-                .get()
                 .usingRecursiveComparison()
                 .isEqualTo(testFilm1);
     }
@@ -266,18 +263,14 @@ class FilmorateApplicationTests {
     @Test
     public void testUpdateFilm() {
         Film testFilm1 = getTestFilm1();
-        Film testFilm2 = getTestFilm2();
-        testFilm2.setId(1);
 
         filmStorage.createFilm(testFilm1);
         assertEquals(1, filmStorage.getFilms().size());
 
-        Optional<Film> updateFilm = filmStorage.updateFilm(testFilm2);
+        Film updateFilm = filmStorage.updateFilm(testFilm1);
         assertThat(updateFilm)
-                .isPresent()
-                .get()
                 .usingRecursiveComparison()
-                .isEqualTo(testFilm2);
+                .isEqualTo(testFilm1);
     }
 
     @Test
@@ -300,11 +293,9 @@ class FilmorateApplicationTests {
         assertEquals(1, filmStorage.getFilms().size());
 
         filmStorage.addLike(testFilm1.getId(), testFilm1.getId());
-        Set<Optional<Film>> film = filmStorage.getPopularFilm(1);
-        Optional<Film> popFilm = film.stream().findFirst().get();
+        Set<Film> film = filmStorage.getPopularFilm(1);
+        Film popFilm = film.stream().findFirst().get();
         assertThat(popFilm)
-                .isPresent()
-                .get()
                 .usingRecursiveComparison()
                 .isEqualTo(testFilm1);
     }
