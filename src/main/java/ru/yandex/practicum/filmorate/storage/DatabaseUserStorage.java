@@ -106,14 +106,11 @@ public class DatabaseUserStorage implements UserDbStorage {
     }
 
     @Override
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public List<User> getCommonFriends(long id, long friendId) {
-        List<Long> usersList = new ArrayList<>(getFriends(id).stream().map(User::getId).toList());
-        List<Long> friendsList = getFriends(friendId).stream().map(User::getId).toList();
-        usersList.retainAll(friendsList);
-        return usersList.stream()
-                .map(this::getUserById)
-                .map(Optional::get)
+        List<User> listUser = getFriends(id);
+        List<User> listFriend = getFriends(friendId);
+        return listUser.stream()
+                .filter(listFriend::contains)
                 .toList();
     }
 }
