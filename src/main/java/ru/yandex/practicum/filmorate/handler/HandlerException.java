@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.handler;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -11,7 +10,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Slf4j
 @RestControllerAdvice
 public class HandlerException {
 
@@ -19,7 +17,6 @@ public class HandlerException {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public Map<String, String> processValidationException(ValidationException e) {
         HashMap<String, String> response = new HashMap<>();
-        log.error("error: ", e.getMessage());
         response.put("error: ", e.getMessage());
         return response;
     }
@@ -28,7 +25,6 @@ public class HandlerException {
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public Map<String, String> processNotFoundException(NotFoundException e) {
         HashMap<String, String> response = new HashMap<>();
-        log.error("error: ", e.getMessage());
         response.put("error: ", e.getMessage());
         return response;
     }
@@ -37,10 +33,7 @@ public class HandlerException {
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> processAnyException(Throwable e) {
         HashMap<String, String> response = new HashMap<>();
-        log.error("Ошибка: ", e.getMessage());
         response.put("error: ", "Неизвестная ошибка.");
         return response;
     }
-
-
 }

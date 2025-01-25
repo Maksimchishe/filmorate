@@ -1,153 +1,64 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
+@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     @GetMapping
-    public Collection<User> getUsers() {
+    public Set<UserDto> getUsers() {
         return userService.getUsers();
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable int id) {
-        if (validatorUser(id)) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
+    public UserDto getUserById(@PathVariable long id) {
         return userService.getUserById(id);
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            throw ValidationException.emailValidationException();
-        }
-
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw ValidationException.loginValidationException();
-        }
-
-        if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw ValidationException.birthdayValidationException();
-        }
-
-        return userService.createUser(user);
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public UserDto createUser(@RequestBody UserDto userDto) {
+        return userService.createUser(userDto);
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) {
-        if (validatorUser(user.getId())) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
-
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            throw ValidationException.emailValidationException();
-        }
-
-        if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw ValidationException.loginValidationException();
-        }
-
-        if (user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw ValidationException.birthdayValidationException();
-        }
-
-        return userService.updateUser(user);
+    public UserDto updateUser(@RequestBody UserDto userDto) {
+        return userService.updateUser(userDto);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUserById(@PathVariable int id) {
-        if (validatorUser(id)) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
+    public void deleteUserById(@PathVariable long id) {
         userService.deleteUserById(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
-        if (validatorUser(id)) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
-        if (validatorUser(friendId)) {
-            throw NotFoundException.idFriendNotFoundException();
-        }
-
-        if (id == friendId) {
-            throw ValidationException.idValidationException();
-        }
-
+    public void addFriend(@PathVariable long id, @PathVariable long friendId) {
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
-        if (validatorUser(id)) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
-        if (validatorUser(friendId)) {
-            throw NotFoundException.idFriendNotFoundException();
-        }
-
-        if (id == friendId) {
-            throw ValidationException.idValidationException();
-        }
-
+    public void deleteFriend(@PathVariable long id, @PathVariable long friendId) {
         userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public Set<User> getFriends(@PathVariable int id) {
-        if (validatorUser(id)) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
-        return userService.getFriendsById(id);
+    public Set<UserDto> getFriends(@PathVariable long id) {
+        return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{friendId}")
-    public Set<User> getCommonFriends(@PathVariable int id, @PathVariable int friendId) {
-        if (validatorUser(id)) {
-            throw ValidationException.idValidationException();
-        }
-
-        if (validatorUser(friendId)) {
-            throw ValidationException.idValidationException();
-        }
-
-        if (id == friendId) {
-            throw ValidationException.idValidationException();
-        }
-
+    public Set<UserDto> getCommonFriends(@PathVariable long id, @PathVariable long friendId) {
         return userService.getCommonFriends(id, friendId);
-    }
-
-    private boolean validatorUser(int id) {
-        return userService.getUsers().stream().noneMatch(f -> f.getId() == id);
     }
 }

@@ -2,110 +2,77 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @RestController
-@RequestMapping("/films")
+@RequestMapping
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
-    private final UserService userService;
 
-    @GetMapping
-    public Collection<Film> getFilms() {
+    @GetMapping("/films")
+    public Set<FilmDto> getFilms() {
         return filmService.getFilms();
     }
 
-    @PostMapping
-    public Film createFilm(@RequestBody Film film) {
-        if (film.getName().isBlank()) {
-            throw ValidationException.nameValidationException();
-        }
-
-        if (film.getDescription().length() > 200) {
-            throw ValidationException.descriptionValidationException();
-        }
-
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw ValidationException.releaseDateValidationException();
-        }
-
-        if (film.getDuration() < 0) {
-            throw ValidationException.durationValidationException();
-        }
-
-        return filmService.createFilm(film);
+    @GetMapping("/films/{id}")
+    public FilmDto getFilmById(@PathVariable long id) {
+        return filmService.getFilmById(id);
     }
 
-    @PutMapping
-    public Film updateFilm(@RequestBody Film film) {
-        if (validatorFilm(film.getId())) {
-            throw NotFoundException.filmNotFoundException();
-        }
-
-        if (film.getName().isBlank()) {
-            throw ValidationException.nameValidationException();
-        }
-
-        if (film.getDescription().length() > 200) {
-            throw ValidationException.descriptionValidationException();
-        }
-
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            throw ValidationException.releaseDateValidationException();
-        }
-
-        if (film.getDuration() < 0) {
-            throw ValidationException.durationValidationException();
-        }
-
-        return filmService.updateFilm(film);
+    @PostMapping("/films")
+    public FilmDto createFilm(@RequestBody FilmDto filmDto) {
+        return filmService.createFilm(filmDto);
     }
 
-    @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable int id, @PathVariable int userId) {
-        if (validatorFilm(id)) {
-            throw NotFoundException.filmNotFoundException();
-        }
+    @PutMapping("/films")
+    public FilmDto updateFilm(@RequestBody FilmDto filmDto) {
+        return filmService.updateFilm(filmDto);
+    }
 
-        if (validatorUser(userId)) {
-            throw NotFoundException.idUserNotFoundException();
-        }
+    @DeleteMapping("/films/{id}")
+    public void deleteFilmById(@PathVariable long id) {
+        filmService.deleteFilmById(id);
+    }
 
+    @PutMapping("/films/{id}/like/{userId}")
+    public void addLike(@PathVariable long id, @PathVariable long userId) {
         filmService.addLike(id, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
-    public void deleteLike(@PathVariable int id, @PathVariable int userId) {
-        if (validatorFilm(id)) {
-            throw NotFoundException.filmNotFoundException();
-        }
-
-        if (validatorUser(userId)) {
-            throw NotFoundException.idUserNotFoundException();
-        }
-
+    @DeleteMapping("/films/{id}/like/{userId}")
+    public void deleteLike(@PathVariable long id, @PathVariable long userId) {
         filmService.deleteLike(id, userId);
     }
 
-    @GetMapping("/popular")
-    public List<Film> getPopularFilm(@RequestParam(required = false) Integer count) {
+    @GetMapping("/films/popular")
+    public Set<FilmDto> getPopularFilm(@RequestParam(required = false) long count) {
         return filmService.getPopularFilm(count);
     }
 
-    private boolean validatorUser(int id) {
-        return userService.getUsers().stream().noneMatch(f -> f.getId() == id);
+    @GetMapping("/genres")
+    public Set<Genre> getGenres() {
+        return filmService.getGenres();
     }
 
-    private boolean validatorFilm(int id) {
-        return filmService.getFilms().stream().noneMatch(f -> f.getId() == id);
+    @GetMapping("/genres/{id}")
+    public Genre getGenreById(@PathVariable long id) {
+        return filmService.getGenreById(id);
     }
+
+    @GetMapping("/mpa")
+    public Set<Mpa> getMpas() {
+        return filmService.getMpas();
+    }
+
+    @GetMapping("/mpa/{id}")
+    public Mpa getMpaById(@PathVariable long id) {
+        return filmService.getMpaById(id);
+    }
+
 }
