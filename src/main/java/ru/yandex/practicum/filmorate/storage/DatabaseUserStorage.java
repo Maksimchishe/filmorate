@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 
 import java.util.*;
 
+@SuppressWarnings("ALL")
 @Repository
 @RequiredArgsConstructor
 public class DatabaseUserStorage implements UserDbStorage {
@@ -28,11 +30,13 @@ public class DatabaseUserStorage implements UserDbStorage {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("id", id);
         String sqlQuery = "SELECT id, email, login, name, birthday FROM Users WHERE id = :id";
-        List<User> users = jdbc.query(sqlQuery, params, userRowMapper);
-        if (users.size() == 1) {
-            return Optional.ofNullable(users.getFirst());
+        User user = null;
+        try {
+            user = jdbc.queryForObject(sqlQuery, params, userRowMapper);
+        } catch (DataAccessException e) {
+            Optional.empty();
         }
-        return Optional.empty();
+        return Optional.ofNullable(user);
     }
 
     @Override

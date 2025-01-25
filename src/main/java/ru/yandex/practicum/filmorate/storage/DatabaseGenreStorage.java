@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("ALL")
 @Repository
 @RequiredArgsConstructor
 public class DatabaseGenreStorage implements GenreDbStorage {
@@ -33,10 +35,13 @@ public class DatabaseGenreStorage implements GenreDbStorage {
         params.addValue("id", id);
         String sqlQuery = "SELECT id, name FROM Genres WHERE id = :id";
         List<Genre> genres = jdbc.query(sqlQuery, params, genreRowMapper);
-        if (genres.size() == 1) {
-            return Optional.ofNullable(genres.getFirst());
+        Genre genre = null;
+        try {
+            genre = jdbc.queryForObject(sqlQuery, params, genreRowMapper);
+        } catch (DataAccessException e) {
+            Optional.empty();
         }
-        return Optional.empty();
+        return Optional.ofNullable(genre);
     }
 
     @Override

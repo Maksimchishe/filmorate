@@ -50,9 +50,9 @@ public class FilmService {
             throw new ValidationException("Время продолжительности фильма не может быть < 0.");
         }
         mpaDbStorage.getMpaById(filmDto.getMpa().getId())
-                .orElseThrow(() -> new ValidationException("Рейтинг не найден."));
+                .orElseThrow(() -> new NotFoundException("Рейтинг не найден."));
         if (validatorGenres(filmDto.getGenres())) {
-            throw new ValidationException("Жанр не найден.");
+            throw new NotFoundException("Жанр не найден.");
         }
         return FilmMapper.toDto(filmStorage.createFilm(FilmMapper.toModel(filmDto)));
     }
@@ -71,9 +71,9 @@ public class FilmService {
             throw new ValidationException("Время продолжительности фильма не может быть < 0.");
         }
         mpaDbStorage.getMpaById(filmDto.getMpa().getId())
-                .orElseThrow(() -> new ValidationException("Рейтинг не найден."));
+                .orElseThrow(() -> new NotFoundException("Рейтинг не найден."));
         if (validatorGenres(filmDto.getGenres())) {
-            throw new ValidationException("Жанр не найден.");
+            throw new NotFoundException("Жанр не найден.");
         }
         return FilmMapper.toDto(filmStorage.updateFilm(FilmMapper.toModel(filmDto)));
     }

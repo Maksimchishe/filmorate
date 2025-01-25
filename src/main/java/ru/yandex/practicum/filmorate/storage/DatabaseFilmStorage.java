@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -46,11 +47,13 @@ public class DatabaseFilmStorage implements FilmDbStorage {
                 mpa_id
                 FROM Films WHERE id = :id
                 """;
-        List<Film> films = jdbc.query(sqlQuery, params, filmRowMapper);
-        if (films.size() == 1) {
-            return Optional.ofNullable(films.getFirst());
+        Film film = null;
+        try {
+            film = jdbc.queryForObject(sqlQuery, params, filmRowMapper);
+        } catch (DataAccessException e) {
+            Optional.empty();
         }
-        return Optional.empty();
+        return Optional.ofNullable(film);
     }
 
     @Override
