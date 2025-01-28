@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `Genres`
 CREATE TABLE IF NOT EXISTS `Genres_save`
 (
     `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
-    `user_id` integer NOT NULL,
+    `film_id` integer NOT NULL,
     `genre_id` integer NOT NULL,
     `created_at` timestamp DEFAULT CURRENT_TIMESTAMP
 );
@@ -88,15 +88,15 @@ ALTER TABLE IF EXISTS `Likes`
 CREATE INDEX IF NOT EXISTS `fki_LikeUser`
     ON `Likes`(user_id);
 ALTER TABLE IF EXISTS `Genres_save`
-    ADD CONSTRAINT IF NOT EXISTS `GenreSaveUser` FOREIGN KEY (user_id)
-    REFERENCES `Users` (id)
+    ADD CONSTRAINT IF NOT EXISTS `GenreSaveFilm` FOREIGN KEY (film_id)
+    REFERENCES `Films` (id)
     ON UPDATE CASCADE
     ON DELETE CASCADE;
-CREATE INDEX IF NOT EXISTS `fki_GenreSaveUser`
-    ON `Genres_save`(user_id);
+CREATE INDEX IF NOT EXISTS `GenreSaveFilm`
+    ON `Genres_save`(film_id);
 ALTER TABLE IF EXISTS `Genres_save`
     ADD CONSTRAINT IF NOT EXISTS `GenreSaveGenre` FOREIGN KEY (genre_id)
-    REFERENCES `Users` (id)
+    REFERENCES `Films` (id)
     ON UPDATE CASCADE
     ON DELETE CASCADE;
 CREATE INDEX IF NOT EXISTS `fki_GenreSaveGenre`

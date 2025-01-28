@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
 import java.util.*;
@@ -75,21 +73,8 @@ public class DatabaseFilmStorage implements FilmDbStorage {
         film.setMpa(mpaDbStorage.getMpaById(film.getMpa().getId()).get());
 
         if (film.getGenres() != null) {
-            String sqlGenres = """
-                    INSERT INTO Genres_save(user_id, genre_id)
-                    VALUES (:user_id, :genre_id)
-                    """;
-            SqlParameterSource[] mapGenres = film.getGenres().stream()
-                    .map(e -> new MapSqlParameterSource()
-                            .addValue("user_id", film.getId())
-                            .addValue("genre_id", e.getId())
-                    )
-                    .toArray(SqlParameterSource[]::new);
-            jdbc.batchUpdate(sqlGenres, mapGenres);
-
-            film.setGenres(genreDbStorage.getGenresUserById(film.getId()).stream()
-                    .sorted(Comparator.comparing(Genre::getId))
-                    .collect(Collectors.toCollection(LinkedHashSet::new)));
+            genreDbStorage.createGenresForFilmById(film.getId(), film.getGenres());
+            film.setGenres(genreDbStorage.getGenresFilmById(film.getId()));
         }
         return film;
     }
@@ -121,21 +106,8 @@ public class DatabaseFilmStorage implements FilmDbStorage {
         film.setMpa(mpaDbStorage.getMpaById(film.getMpa().getId()).get());
 
         if (film.getGenres() != null) {
-            String sqlGenres = """
-                    INSERT INTO Genres_save(user_id, genre_id)
-                    VALUES (:user_id, :genre_id)
-                    """;
-            SqlParameterSource[] mapGenres = film.getGenres().stream()
-                    .map(e -> new MapSqlParameterSource()
-                            .addValue("user_id", film.getId())
-                            .addValue("genre_id", e.getId())
-                    )
-                    .toArray(SqlParameterSource[]::new);
-            jdbc.batchUpdate(sqlGenres, mapGenres);
-
-            film.setGenres(genreDbStorage.getGenresUserById(film.getId()).stream()
-                    .sorted(Comparator.comparing(Genre::getId))
-                    .collect(Collectors.toCollection(LinkedHashSet::new)));
+            genreDbStorage.updateGenresForFilmById(film.getId(), film.getGenres());
+            film.setGenres(genreDbStorage.getGenresFilmById(film.getId()));
         }
         return film;
     }
@@ -175,7 +147,7 @@ public class DatabaseFilmStorage implements FilmDbStorage {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("limitMax", count);
         String sqlQuery = """
-                SELECT F.*, COUNT(L.film_id) as count
+                SELECT F.*, COUNT(L.film_id) AS count
                 FROM Films AS F
                 JOIN Likes AS L ON L.film_id = F.id
                 GROUP BY F.id
