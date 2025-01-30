@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,6 +20,28 @@ import java.util.stream.Collectors;
 public class DatabaseGenreStorage implements GenreDbStorage {
     private final NamedParameterJdbcOperations jdbc;
     private final GenreRowMapper genreRowMapper;
+
+    @Override
+    public LinkedHashSet<Genre> getGenres() {
+        String sqlQuery = "SELECT id, name FROM Genres";
+        return jdbc.query(sqlQuery, genreRowMapper).stream()
+                .sorted(Comparator.comparing(Genre::getId))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    public Optional<Genre> getGenreById(long id) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
+        String sqlQuery = "SELECT id, name FROM Genres WHERE id = :id";
+        Genre genre = null;
+        try {
+            genre = jdbc.queryForObject(sqlQuery, params, genreRowMapper);
+        } catch (DataAccessException e) {
+            Optional.empty();
+        }
+        return Optional.ofNullable(genre);
+    }
 
     @Override
     public void createGenresForFilmById(long filmId, LinkedHashSet<Genre> genres) {
@@ -39,8 +60,6 @@ public class DatabaseGenreStorage implements GenreDbStorage {
 
     @Override
     public void updateGenresForFilmById(long filmId, LinkedHashSet<Genre> genres) {
-        deleteGenreForFilmById(filmId);
-
         String sqlGenres = """
                 INSERT INTO Genres_save(film_id, genre_id)
                 VALUES (:film_id, :genre_id)
@@ -55,34 +74,11 @@ public class DatabaseGenreStorage implements GenreDbStorage {
     }
 
     @Override
-    public LinkedHashSet<Genre> getGenres() {
-        String sqlQuery = "SELECT id, name FROM Genres";
-        return jdbc.query(sqlQuery, genreRowMapper).stream()
-                .sorted(Comparator.comparing(Genre::getId))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    @Override
     public void deleteGenreForFilmById(long id) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("film_id", id);
-        String sqlQuery = "DELETE FROM Genres_save WHERE film_id = :film_id";
-        jdbc.update(sqlQuery, params);
-    }
-
-    @Override
-    public Optional<Genre> getGenreById(long id) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("id", id);
-        String sqlQuery = "SELECT id, name FROM Genres WHERE id = :id";
-        List<Genre> genres = jdbc.query(sqlQuery, params, genreRowMapper);
-        Genre genre = null;
-        try {
-            genre = jdbc.queryForObject(sqlQuery, params, genreRowMapper);
-        } catch (DataAccessException e) {
-            Optional.empty();
-        }
-        return Optional.ofNullable(genre);
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("film_id", id);
+            String sqlQuery = "DELETE FROM Genres_save WHERE film_id = :film_id";
+            jdbc.update(sqlQuery, params);
     }
 
     @Override

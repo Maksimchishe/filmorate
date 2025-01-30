@@ -49,15 +49,22 @@ public class FilmService {
         if (filmDto.getDuration() < 0) {
             throw new ValidationException("Время продолжительности фильма не может быть < 0.");
         }
+
         mpaDbStorage.getMpaById(filmDto.getMpa().getId())
                 .orElseThrow(() -> new NotFoundException("Рейтинг не найден."));
-        if (validatorGenres(filmDto.getGenres())) {
-            throw new NotFoundException("Жанр не найден.");
+
+        if (filmDto.getGenres() != null) {
+            filmDto.getGenres().forEach(g -> genreDbStorage.getGenreById(g.getId())
+                    .orElseThrow(() -> new NotFoundException(":Жанр не найден."))
+            );
         }
+
         return FilmMapper.toDto(filmStorage.createFilm(FilmMapper.toModel(filmDto)));
     }
 
     public FilmDto updateFilm(FilmDto filmDto) {
+        filmStorage.getFilmById(filmDto.getId())
+                .orElseThrow(() -> new NotFoundException("Фильм не найден."));
         if (filmDto.getName().isBlank()) {
             throw new ValidationException("Поле name не может быть пустым.");
         }
@@ -70,11 +77,16 @@ public class FilmService {
         if (filmDto.getDuration() < 0) {
             throw new ValidationException("Время продолжительности фильма не может быть < 0.");
         }
+
         mpaDbStorage.getMpaById(filmDto.getMpa().getId())
                 .orElseThrow(() -> new NotFoundException("Рейтинг не найден."));
-        if (validatorGenres(filmDto.getGenres())) {
-            throw new NotFoundException("Жанр не найден.");
+
+        if (filmDto.getGenres() != null) {
+            filmDto.getGenres().forEach(g -> genreDbStorage.getGenreById(g.getId())
+                    .orElseThrow(() -> new NotFoundException(":Жанр не найден."))
+            );
         }
+
         return FilmMapper.toDto(filmStorage.updateFilm(FilmMapper.toModel(filmDto)));
     }
 
@@ -124,16 +136,5 @@ public class FilmService {
                 .orElseThrow(() -> new NotFoundException("Рейтинг не найден."));
     }
 
-    private boolean validatorGenres(Set<Genre> genres) {
-        if (genres == null) return false;
-        List<Long> genresFilm = genres.stream()
-                .map(Genre::getId)
-                .toList();
-        List<Long> genresBase = new ArrayList<>(genreDbStorage.getGenres().stream()
-                .map(Genre::getId)
-                .toList());
-        genresBase.retainAll(genresFilm);
-        return !(genresFilm.size() == genresBase.size());
-    }
 }
 

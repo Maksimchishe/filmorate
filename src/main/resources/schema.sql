@@ -96,7 +96,7 @@ CREATE INDEX IF NOT EXISTS `GenreSaveFilm`
     ON `Genres_save`(film_id);
 ALTER TABLE IF EXISTS `Genres_save`
     ADD CONSTRAINT IF NOT EXISTS `GenreSaveGenre` FOREIGN KEY (genre_id)
-    REFERENCES `Films` (id)
+    REFERENCES `Genres` (id)
     ON UPDATE CASCADE
     ON DELETE CASCADE;
 CREATE INDEX IF NOT EXISTS `fki_GenreSaveGenre`

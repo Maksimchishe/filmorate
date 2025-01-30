@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
@@ -100,15 +99,14 @@ public class DatabaseFilmStorage implements FilmDbStorage {
                 """;
         jdbc.update(sqlQuery, params);
 
-        if (film.getMpa().getId() != getFilmById(film.getId()).get().getMpa().getId()) {
-            throw new NotFoundException("Неверный рейтинг");
-        }
         film.setMpa(mpaDbStorage.getMpaById(film.getMpa().getId()).get());
 
         if (film.getGenres() != null) {
+            genreDbStorage.deleteGenreForFilmById(film.getId());
             genreDbStorage.updateGenresForFilmById(film.getId(), film.getGenres());
             film.setGenres(genreDbStorage.getGenresFilmById(film.getId()));
         }
+
         return film;
     }
 
