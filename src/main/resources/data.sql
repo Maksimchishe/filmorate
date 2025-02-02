@@ -11,4 +11,3 @@ MERGE INTO Ratings(id, name) VALUES (3, 'PG-13');
 MERGE INTO Ratings(id, name) VALUES (4, 'R');
 MERGE INTO Ratings(id, name) VALUES (5, 'NC-17');
 
-

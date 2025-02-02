@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dao.GenreDbStorage;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mappers.GenreRowMapper;
 
@@ -45,21 +46,6 @@ public class DatabaseGenreStorage implements GenreDbStorage {
 
     @Override
     public void createGenresForFilmById(long filmId, LinkedHashSet<Genre> genres) {
-        String sqlGenres = """
-                INSERT INTO Genres_save(film_id, genre_id)
-                VALUES (:film_id, :genre_id)
-                """;
-        SqlParameterSource[] mapGenres = genres.stream()
-                .map(e -> new MapSqlParameterSource()
-                        .addValue("film_id", filmId)
-                        .addValue("genre_id", e.getId())
-                )
-                .toArray(SqlParameterSource[]::new);
-        jdbc.batchUpdate(sqlGenres, mapGenres);
-    }
-
-    @Override
-    public void updateGenresForFilmById(long filmId, LinkedHashSet<Genre> genres) {
         String sqlGenres = """
                 INSERT INTO Genres_save(film_id, genre_id)
                 VALUES (:film_id, :genre_id)

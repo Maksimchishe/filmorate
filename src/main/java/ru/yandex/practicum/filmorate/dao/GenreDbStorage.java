@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dao;
 
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -8,8 +8,6 @@ import java.util.Optional;
 public interface GenreDbStorage {
 
     void createGenresForFilmById(long filmId, LinkedHashSet<Genre> genres);
-
-    void updateGenresForFilmById(long filmId, LinkedHashSet<Genre> genres);
 
     void deleteGenreForFilmById(long id);
 

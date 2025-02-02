@@ -29,11 +29,11 @@ public class HandlerException {
         return response;
     }
 
-    @ExceptionHandler(value = Throwable.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> processAnyException(Throwable e) {
-        HashMap<String, String> response = new HashMap<>();
-        response.put("error: ", "Неизвестная ошибка.");
-        return response;
-    }
+//    @ExceptionHandler(value = Throwable.class)
+//    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+//    public Map<String, String> processAnyException(Throwable e) {
+//        HashMap<String, String> response = new HashMap<>();
+//        response.put("error: ", "Неизвестная ошибка.");
+//        return response;
+//    }
 }

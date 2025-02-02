@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `Films`
     `description` VARCHAR(250) NOT NULL,
     `releaseDate` timestamp NOT NULL,
     `duration` integer NOT NULL,
-    `mpa_id` integer,
+    `mpa_id` integer NOT NULL,
     `created_at` timestamp DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS `Ratings`
@@ -51,6 +51,22 @@ CREATE TABLE IF NOT EXISTS `Users`
       `friends_id` INTEGER,
       `created_at` timestamp DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS `Directors`
+(
+      `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+      `name` VARCHAR(250) NOT NULL,
+      `created_at` timestamp DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS `Directors_save`
+(
+    `id` INTEGER PRIMARY KEY AUTO_INCREMENT,
+    `film_id` integer NOT NULL,
+    `director_id` integer NOT NULL,
+    `created_at` timestamp DEFAULT CURRENT_TIMESTAMP
+);
+
 
 ALTER TABLE IF EXISTS `Films`
     ADD CONSTRAINT IF NOT EXISTS `FilmMpa` FOREIGN KEY (mpa_id)
@@ -102,3 +118,20 @@ ALTER TABLE IF EXISTS `Genres_save`
 CREATE INDEX IF NOT EXISTS `fki_GenreSaveGenre`
     ON `Genres_save`(genre_id);
 
+
+
+ALTER TABLE IF EXISTS `Directors_save`
+    ADD CONSTRAINT IF NOT EXISTS `DirectorSaveFilm` FOREIGN KEY (film_id)
+    REFERENCES `Films` (id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS `DirectorSaveFilm`
+    ON `Directors_save`(film_id);
+
+ALTER TABLE IF EXISTS `Directors_save`
+    ADD CONSTRAINT IF NOT EXISTS `DirectorSaveDirector` FOREIGN KEY (director_id)
+    REFERENCES `Directors` (id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS `fki_DirectorSaveDirector`
+    ON `Directors_save`(director_id);

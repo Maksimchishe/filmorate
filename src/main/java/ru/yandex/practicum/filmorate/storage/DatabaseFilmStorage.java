@@ -7,6 +7,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dao.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dao.GenreDbStorage;
+import ru.yandex.practicum.filmorate.dao.MpaDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
@@ -21,13 +25,18 @@ public class DatabaseFilmStorage implements FilmDbStorage {
     private final FilmRowMapper filmRowMapper;
     private final MpaDbStorage mpaDbStorage;
     private final GenreDbStorage genreDbStorage;
+    private final DirectorDbStorage directorDbStorage;
 
     @Override
     public List<Film> getFilms() {
         String sqlQuery = """
                 SELECT id, name, description, releaseDate, duration, mpa_id FROM Films
                 """;
-        return jdbc.query(sqlQuery, filmRowMapper);
+        List<Film> filmList = jdbc.query(sqlQuery, filmRowMapper);
+        for (Film film : filmList) {
+            film.setDirectors(directorDbStorage.getDirectorsFilmById(film.getId()));
+        }
+        return filmList;
     }
 
     @Override
@@ -47,6 +56,7 @@ public class DatabaseFilmStorage implements FilmDbStorage {
         Film film = null;
         try {
             film = jdbc.queryForObject(sqlQuery, params, filmRowMapper);
+            film.setDirectors(directorDbStorage.getDirectorsFilmById(film.getId()));
         } catch (DataAccessException e) {
             Optional.empty();
         }
@@ -74,6 +84,11 @@ public class DatabaseFilmStorage implements FilmDbStorage {
         if (film.getGenres() != null) {
             genreDbStorage.createGenresForFilmById(film.getId(), film.getGenres());
             film.setGenres(genreDbStorage.getGenresFilmById(film.getId()));
+        }
+
+        if (film.getDirectors() != null) {
+            directorDbStorage.createDirectorsForFilmById(film.getId(), film.getDirectors());
+            film.setDirectors(directorDbStorage.getDirectorsFilmById(film.getId()));
         }
         return film;
     }
@@ -103,8 +118,14 @@ public class DatabaseFilmStorage implements FilmDbStorage {
 
         if (film.getGenres() != null) {
             genreDbStorage.deleteGenreForFilmById(film.getId());
-            genreDbStorage.updateGenresForFilmById(film.getId(), film.getGenres());
+            genreDbStorage.createGenresForFilmById(film.getId(), film.getGenres());
             film.setGenres(genreDbStorage.getGenresFilmById(film.getId()));
+        }
+
+        if (film.getDirectors() != null) {
+            directorDbStorage.deleteDirectorsFilmById(film.getId());
+            directorDbStorage.createDirectorsForFilmById(film.getId(), film.getDirectors());
+            film.setDirectors(directorDbStorage.getDirectorsFilmById(film.getId()));
         }
 
         return film;
@@ -141,7 +162,7 @@ public class DatabaseFilmStorage implements FilmDbStorage {
     }
 
     @Override
-    public Set<Film> getPopularFilm(long count) {
+    public LinkedHashSet<Film> getPopularFilm(long count) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("limitMax", count);
         String sqlQuery = """

@@ -75,4 +75,8 @@ public class FilmController {
         return filmService.getMpaById(id);
     }
 
+    @GetMapping("/films/director/{id}")
+    public Set<FilmDto> getFilmDirectorSortById(@PathVariable long id, @RequestParam(required = false) String sortBy) {
+        return filmService.getFilmDirectorSortById(id, sortBy);
+    }
 }
