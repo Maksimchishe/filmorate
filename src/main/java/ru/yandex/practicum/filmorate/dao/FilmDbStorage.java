@@ -21,4 +21,6 @@ public interface FilmDbStorage {
     void deleteLike(long id, long userId);
 
     LinkedHashSet<Film> getPopularFilm(long count);
+
+    List<Long> getCommonFilmSortByUserIdAndFriendId(long userId, long friendId);
 }
