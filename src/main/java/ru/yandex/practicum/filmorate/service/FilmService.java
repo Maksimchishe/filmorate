@@ -114,11 +114,7 @@ public class FilmService {
         filmDbStorage.deleteLike(id, userId);
     }
 
-    public Set<FilmDto> getPopularFilm(long count, long genreId, long year) {
-
-
-
-
+    public Set<FilmDto> getPopularFilm(long count) {
         LinkedHashSet<Film> filmList = filmDbStorage.getPopularFilm(count);
         for (Film film : filmList) {
             film.setDirectors(directorDbStorage.getDirectorsFilmById(film.getId()));
