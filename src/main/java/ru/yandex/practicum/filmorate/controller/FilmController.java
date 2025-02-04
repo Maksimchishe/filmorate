@@ -52,11 +52,8 @@ public class FilmController {
 
     /*GET /films/popular?count={limit}&genreId={genreId}&year={year}*/
     @GetMapping("/films/popular")
-    public Set<FilmDto> getPopularFilm(@RequestParam(required = false) long count,
-                                       @RequestParam(required = false) long genreId,
-                                       @RequestParam(required = false) long year
-                                       ) {
-        return filmService.getPopularFilm(count, genreId, year);
+    public Set<FilmDto> getPopularFilm(@RequestParam(required = false) long count) {
+        return filmService.getPopularFilm(count);
     }
 
     @GetMapping("/genres")
@@ -82,5 +79,10 @@ public class FilmController {
     @GetMapping("/films/director/{id}")
     public Set<FilmDto> getFilmDirectorSortById(@PathVariable long id, @RequestParam(required = false) String sortBy) {
         return filmService.getFilmDirectorSortById(id, sortBy);
+    }
+
+    @GetMapping("/films/common")
+    public Set<FilmDto> getCommonFilmSortByUserIdAndFriendId(@RequestParam long userId, @RequestParam long friendId) {
+        return filmService.getCommonFilmSortByUserIdAndFriendId(userId, friendId);
     }
 }

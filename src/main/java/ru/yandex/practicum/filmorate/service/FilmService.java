@@ -114,11 +114,7 @@ public class FilmService {
         filmDbStorage.deleteLike(id, userId);
     }
 
-    public Set<FilmDto> getPopularFilm(long count, long genreId, long year) {
-
-
-
-
+    public Set<FilmDto> getPopularFilm(long count) {
         LinkedHashSet<Film> filmList = filmDbStorage.getPopularFilm(count);
         for (Film film : filmList) {
             film.setDirectors(directorDbStorage.getDirectorsFilmById(film.getId()));
@@ -166,6 +162,18 @@ public class FilmService {
         } else {
             return null;
         }
+    }
+
+    public LinkedHashSet<FilmDto> getCommonFilmSortByUserIdAndFriendId(long userId, long friendId) {
+        userDbStorage.getUserById(userId)
+                .orElseThrow(() -> new ValidationException("Пользователь не найден."));
+        userDbStorage.getUserById(friendId)
+                .orElseThrow(() -> new ValidationException("Пользователь не найден."));
+        return getPopularFilm(Long.MAX_VALUE).stream()
+                .filter(f ->
+                        filmDbStorage.getCommonFilmSortByUserIdAndFriendId(userId, friendId).stream()
+                                .anyMatch(i -> f.getId() == i))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
 

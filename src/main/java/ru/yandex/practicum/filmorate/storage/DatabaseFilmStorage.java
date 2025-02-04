@@ -176,4 +176,22 @@ public class DatabaseFilmStorage implements FilmDbStorage {
         return jdbc.queryForStream(sqlQuery, params, filmRowMapper)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    @Override
+    public List<Long> getCommonFilmSortByUserIdAndFriendId(long userId, long friendId) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("user_id", userId);
+        params.addValue("friend_id", friendId);
+        String sqlQuery = """
+                SELECT film_id
+                FROM(
+                SELECT film_id, COUNT(film_id) count
+                                FROM Likes
+                                WHERE user_id = :user_id OR user_id = :friend_id
+                                GROUP BY film_id
+                )
+                WHERE count > 1
+                """;
+        return jdbc.queryForList(sqlQuery, params, Long.class);
+    }
 }
